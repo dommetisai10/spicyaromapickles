@@ -63,6 +63,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .announce-track{display:inline-flex;gap:60px;padding:9px 0;animation:marquee 22s linear infinite}
 .announce-track span{display:inline-block;white-space:nowrap}
 @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.offer-strip{display:flex;align-items:center;gap:14px;background:var(--gold);color:#2F2F2F;overflow:hidden;min-height:42px;font-size:.8rem;font-weight:700}
+.offer-strip .announce{flex:1;background:transparent;color:inherit}
+.offer-strip .announce-track{padding:7px 0;animation-duration:28s}
+.offer-strip .announce-track span{color:#2F2F2F}
+.offer-countdown{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:0 16px 0 0;font-size:.74rem;white-space:nowrap}
+.offer-countdown strong{font-variant-numeric:tabular-nums;letter-spacing:.03em}
+@media (max-width:620px){.offer-strip{gap:6px}.offer-strip .announce-track{gap:34px}.offer-countdown{padding-right:8px;font-size:.66rem}.offer-countdown-label{display:none}}
 
 /* NAVBAR */
 .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);box-shadow:var(--shadow-sm);border-bottom:1px solid rgba(91,36,95,.12)}
@@ -105,6 +112,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
 .btn-hero-gold{background:var(--sky);color:#2F2F2F;box-shadow:0 8px 20px rgba(212,160,23,.25);font-weight:700}
 .btn-hero-gold:hover{transform:translateY(-2px);background:#fff;color:var(--blue);box-shadow:0 12px 26px rgba(255,255,255,.3)}
+.hero-offer-badge{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--accent-red),#E05252);color:#fff;padding:10px 26px;border-radius:999px;font-size:.85rem;font-weight:800;letter-spacing:.04em;margin-bottom:18px;box-shadow:0 8px 24px rgba(198,58,58,.45);animation:heroOfferPulse 1.8s ease-in-out infinite}
+.hero-offer-badge i{color:var(--sky)}
+@keyframes heroOfferPulse{0%,100%{transform:scale(1);box-shadow:0 8px 24px rgba(198,58,58,.45)}50%{transform:scale(1.04);box-shadow:0 10px 30px rgba(198,58,58,.65)}}
+@media (max-width:520px){.hero-offer-badge{font-size:.72rem;padding:8px 18px;gap:6px;text-align:center}}
 
 /* CATEGORIES */
 .cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
@@ -402,10 +413,28 @@ footer h4{color:#fff}
   </div>
 </header>
 
+<!-- LIMITED OFFER: 18th to 20th September -->
+<div class="offer-strip" role="status" aria-live="polite">
+  <div class="announce">
+    <div class="announce-track">
+      <span>WELCOME OFFER: Buy &#8377;499+ &amp; get 100g Amla Pickle FREE</span>
+      <span>Buy &#8377;799+ &amp; get 250g Amla Pickle FREE</span>
+      <span>Buy &#8377;1499+ &amp; get 250g Amla Pickle FREE</span>
+      <span>Offer valid September 18th to 20th only</span>
+      <span>WELCOME OFFER: Buy &#8377;499+ &amp; get 100g Amla Pickle FREE</span>
+      <span>Buy &#8377;799+ &amp; get 250g Amla Pickle FREE</span>
+      <span>Buy &#8377;1499+ &amp; get 250g Amla Pickle FREE</span>
+      <span>Offer valid September 18th to 20th only</span>
+    </div>
+  </div>
+  <div class="offer-countdown"><span class="offer-countdown-label">Offer:</span><strong id="offerCountdown">Loading...</strong></div>
+</div>
+
 <!-- HERO -->
 <section class="hero" id="home">
   <div class="container hero-inner">
     <span class="hero-badge">Homemade with Love</span>
+    <div class="hero-offer-badge"><i class="fas fa-gift"></i> WELCOME OFFER &bull; SEPTEMBER 18&ndash;20 ONLY</div>
     <h1>SpicyAromaPickles</h1>
     <p class="hero-desc">Handmade with Tradition. Flavored with Authentic Guntur Kaaram.</p>
     <div class="hero-cta">
@@ -674,14 +703,7 @@ footer h4{color:#fff}
 
         <div id="codDetails" class="payment-info-box">
           <div class="alert-info">
-            <i class="fas fa-info-circle"></i> Minimum &#8377;100 advance payment is required for Cash on Delivery.
-          </div>
-          <div class="qr-wrap">
-            <div id="codQrCanvas"></div>
-            <span class="qr-label">Scan to Pay &#8377;100 Advance</span>
-            <span class="qr-sublabel">SpicyAromaPickles &bull; +91 79898 72395</span>
-            <button type="button" class="upi-app-btn" onclick="openUpiApp(100)"><i class="fas fa-mobile-screen-button"></i> Open PhonePe / UPI App</button>
-            <span class="upi-hint">Mobile lo click chesthe direct ga PhonePe open avutundi</span>
+            <i class="fas fa-truck"></i> Cash on Delivery: pay the full order amount at your doorstep.
           </div>
         </div>
 
@@ -696,7 +718,7 @@ footer h4{color:#fff}
         </div>
 
         <div class="payment-note">
-          <i class="fas fa-shield-alt"></i> Your order will be confirmed after payment verification.
+          <i class="fas fa-shield-alt"></i> Your order will be confirmed after order details are submitted.
         </div>
 
         <div class="checkout-section-title">Order Summary</div>
@@ -721,6 +743,13 @@ const WHATSAPP = "917989872395";
 // Update UPI_ID below with your actual UPI VPA (e.g. name@bank or phone@upi)
 const UPI_ID   = "7989872395@paytm";
 const UPI_NAME = "SpicyAromaPickles";
+const PROMO_START = new Date("2026-09-18T00:00:00+05:30");
+const PROMO_END = new Date("2026-09-20T23:59:59+05:30");
+const PROMO_OFFERS = [
+  {min:1499, weight:"250g", label:"250g Amla Pickle"},
+  {min:799, weight:"250g", label:"250g Amla Pickle"},
+  {min:499, weight:"100g", label:"100g Amla Pickle"}
+];
 
 const IMG = {
   nonveg: "https://foodonfarmpickles.com/cdn/shop/files/Chickenpickle_with_bone.webp?crop=center&height=600&v=1778395771&width=600",
@@ -754,7 +783,7 @@ const PRODUCTS = [
   {n:"Finger Appadalu",          img:"https://indiashopping.io/cdn/shop/files/fryums.jpg?v=1738400908&width=1457", c:"Snacks",                      w:[["250g",180],["500g",340], ["1kg",555]]},
   {n:"Ura Mirapakayalu",         img:"https://m.media-amazon.com/images/I/81T6alBdI7L._AC_UF350,350_QL80_.jpg", c:"Snacks",                      w:[["100g",120],["250g",350], ["500g",600],["1kg",1100]]},
   {n:"Karivepaku Karam",         img:"https://id-preview--be86746d-5cd7-407d-8dbd-289879b5a664.lovable.app/__l5e/assets-v1/3bfec867-10e2-4748-a49d-448e6ec9592a/karivepaku-karam.jpg", c:"Powders",         best:true,  w:[["250g",249],["500g",449], ["1kg",999]]},
-  {n:"Madpu kaaram",             img:"https://nmfoodsofficial.com/wp-content/uploads/2024/08/mungaku-karam.jpg", c:"Powders",                     w:[["250g",270],["500g",470], ["1kg",1100]]}
+  {n:"Munaga Karam",             img:"https://id-preview--be86746d-5cd7-407d-8dbd-289879b5a664.lovable.app/__l5e/assets-v1/05b7892c-42bc-4ce2-97a8-a453a689fc5b/munaga-karam.jpg", c:"Powders",                     w:[["250g",270],["500g",470], ["1kg",1100]]}
 ];
 const CAT_IMG = {"Non-Veg Pickles":IMG.nonveg,"Veg Pickles":IMG.veg,"Snacks":IMG.snacks,"Powders":IMG.powders};
 
@@ -782,6 +811,39 @@ const STEPS = [
 
 /* ---- STATE ---- */
 const state = {filter:"All", sel:{}, qty:{}, cart:[]};
+
+/* ---- LIMITED OFFER ---- */
+function isOfferActive(){
+  const now=new Date();
+  return now>=PROMO_START && now<=PROMO_END;
+}
+function getOffer(){
+  if(!isOfferActive())return null;
+  return PROMO_OFFERS.find(o=>getPaidCartTotal()>=o.min)||null;
+}
+function getPaidCartTotal(){
+  return state.cart.reduce((total,item)=>total+(item.free?0:item.price*item.qty),0);
+}
+function syncOfferItem(){
+  state.cart=state.cart.filter(item=>!item.free);
+  const offer=getOffer();
+  if(offer){
+    state.cart.push({key:"FREE-AMLA",name:"Amla Pickle (FREE OFFER)",weight:offer.weight,price:0,qty:1,img:PRODUCTS.find(p=>p.n==="Amla Pickle")?.img,free:true});
+  }
+}
+function updateOfferCountdown(){
+  const el=document.getElementById("offerCountdown");
+  if(!el)return;
+  const now=new Date();
+  const target=now<PROMO_START?PROMO_START:PROMO_END;
+  if(now>PROMO_END){el.textContent="Offer ended";return;}
+  const remaining=Math.max(0,target-now);
+  const days=Math.floor(remaining/86400000);
+  const hours=Math.floor((remaining%86400000)/3600000);
+  const minutes=Math.floor((remaining%3600000)/60000);
+  const seconds=Math.floor((remaining%60000)/1000);
+  el.textContent=(now<PROMO_START?"Starts in ":"Ends in ")+`${days}d ${String(hours).padStart(2,"0")}h ${String(minutes).padStart(2,"0")}m ${String(seconds).padStart(2,"0")}s`;
+}
 
 /* ---- RENDER STATIC SECTIONS ---- */
 document.getElementById("catGrid").innerHTML = CATEGORIES.map(c=>`
@@ -906,6 +968,7 @@ function changeCartQty(key,delta){
 function cartTotal(){return state.cart.reduce((t,c)=>t+c.price*c.qty,0);}
 
 function renderCart(){
+  syncOfferItem();
   const list=document.getElementById("cartList");
   if(!state.cart.length){
     list.innerHTML='<div class="cart-empty"><i class="fas fa-shopping-cart" style="font-size:3rem;color:var(--beige);margin-bottom:12px"></i><br/>Your cart is empty.<br/>Add your favourite pickles!</div>';
@@ -922,8 +985,8 @@ function renderCart(){
       <img src="${c.img}" alt="${c.name}" loading="lazy" />
       <div class="ci-details">
         <div class="ci-name">${c.name}</div>
-        <div class="ci-meta">${c.weight} &times; &#8377;${c.price}</div>
-        <button class="ci-remove" onclick="removeItem('${c.key.replace(/'/g,"\\'")}')"><i class="fas fa-trash-alt"></i> Remove</button>
+        <div class="ci-meta">${c.weight} &times; ${c.free?"FREE":"&#8377;"+c.price}</div>
+        ${c.free?'<span class="ci-remove" style="color:var(--success);cursor:default"><i class="fas fa-gift"></i> Offer item</span>':`<button class="ci-remove" onclick="removeItem('${c.key.replace(/'/g,"\\'")}')"><i class="fas fa-trash-alt"></i> Remove</button>`}
       </div>
       <div class="ci-qty-controls">
         <button onclick="changeCartQty('${c.key.replace(/'/g,"\\'")}', -1)">-</button>
@@ -999,7 +1062,6 @@ function togglePaymentDetails(method){
   const upi=document.getElementById("upiDetails");
   if(method==="COD"){
     cod.style.display="block";upi.style.display="none";
-    renderQR("codQrCanvas",100);
   } else {
     cod.style.display="none";upi.style.display="block";
     renderQR("qrCanvas", cartTotal()+60);
@@ -1023,7 +1085,7 @@ function placeOrder(){
   if(!/^[0-9]{6}$/.test(pinCode)){alert("Please enter a valid 6-digit PIN code.");return;}
   const payMethod=document.querySelector('input[name="paymentMethod"]:checked')?.value||"COD";
   const sub=cartTotal(), grand=sub+60;
-  const msg=`New Order\n\nCustomer Name: ${name}\nPhone: ${phone}\nEmail: ${email}\n\nAddress:\n${houseNo}, ${street}, ${villageTown}, ${city}, ${district}, ${stateVal} - ${pinCode}\n\nOrdered Items:\n${state.cart.map((c,idx)=>`${idx+1}. ${c.name} (${c.qty} x ${c.weight}) - \u20B9${c.price*c.qty}`).join("\n")}\n\nProduct Total: \u20B9${sub}\nDelivery Charge: \u20B960\nGrand Total: \u20B9${grand}\n\nPayment Method: ${payMethod==="COD"?"Cash on Delivery (min \u20B9100 advance required)":"UPI Payment"}`;
+  const msg=`New Order\n\nCustomer Name: ${name}\nPhone: ${phone}\nEmail: ${email}\n\nAddress:\n${houseNo}, ${street}, ${villageTown}, ${city}, ${district}, ${stateVal} - ${pinCode}\n\nOrdered Items:\n${state.cart.map((c,idx)=>`${idx+1}. ${c.name} (${c.qty} x ${c.weight}) - ${c.free?"FREE":"\\u20B9"+(c.price*c.qty)}`).join("\n")}\n\nProduct Total: \u20B9${sub}\nDelivery Charge: \u20B960\nGrand Total: \u20B9${grand}\n\nPayment Method: ${payMethod==="COD"?"Cash on Delivery":"UPI Payment"}`;
   window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`,"_blank");
 }
 
@@ -1061,6 +1123,8 @@ window.addEventListener("scroll",()=>{
 renderProducts();
 renderCart();
 observeReveals();
+updateOfferCountdown();
+setInterval(updateOfferCountdown,1000);
 </script>
 </body>
 </html>
