@@ -304,7 +304,11 @@ footer h4{color:#fff}
 .qr-sublabel{font-size:.72rem;color:var(--muted)}
 .upi-app-btn{margin-top:6px;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;background:linear-gradient(135deg,#5B245F,#7A3D84);color:#fff;font-weight:700;font-size:.88rem;box-shadow:0 8px 18px rgba(91,36,95,.25)}
 .upi-app-btn i{font-size:1rem}
-.upi-hint{font-size:.7rem;color:var(--muted);text-align:center}
+.upi-app-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%}
+.upi-app-row .upi-app-btn{padding:10px 18px;font-size:.82rem;flex:1 1 auto;justify-content:center}
+.upi-app-btn-outline{background:#fff;color:var(--blue);border:2px solid var(--beige);box-shadow:none}
+.upi-copy-btn{margin-top:4px;display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:999px;background:var(--cream);color:var(--blue);font-weight:600;font-size:.78rem;border:1px solid var(--beige)}
+.upi-hint{font-size:.72rem;color:var(--muted);text-align:center;line-height:1.5;max-width:340px}
 
 .payment-note{font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px}
 .order-summary-card{background:#fff;border-radius:12px;padding:16px;border:1px solid var(--beige);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:8px}
@@ -712,8 +716,14 @@ footer h4{color:#fff}
             <div id="qrCanvas"></div>
             <span class="qr-label">Scan to Pay via UPI</span>
             <span class="qr-sublabel">SpicyAromaPickles &bull; +91 79898 72395</span>
-            <button type="button" class="upi-app-btn" onclick="openUpiApp()"><i class="fas fa-mobile-screen-button"></i> Open PhonePe / UPI App</button>
-            <span class="upi-hint">Mobile lo click chesthe direct ga PhonePe open avutundi</span>
+            <div class="upi-app-row">
+              <button type="button" class="upi-app-btn" onclick="openUpiApp('gpay')"><i class="fas fa-mobile-screen-button"></i> GPay</button>
+              <button type="button" class="upi-app-btn" onclick="openUpiApp('phonepe')"><i class="fas fa-mobile-screen-button"></i> PhonePe</button>
+              <button type="button" class="upi-app-btn" onclick="openUpiApp('paytm')"><i class="fas fa-mobile-screen-button"></i> Paytm</button>
+            </div>
+            <button type="button" class="upi-app-btn upi-app-btn-outline" onclick="openUpiApp('generic')"><i class="fas fa-qrcode"></i> Other UPI App</button>
+            <span class="upi-hint">Mobile lo click chesthe direct ga app open avutundi. Deniki iyna open avvakapothe, ee UPI ID ni copy chesi mee UPI app lo "Pay to UPI ID / Send money" option lo paste chesi pay cheyandi &mdash; QR ni gallery nunchi scan cheyandi, adi &#8377;2,000 varake matrame allow chesthundi.</span>
+            <button type="button" class="upi-copy-btn" onclick="copyUpiId()"><i class="fas fa-copy"></i> Copy UPI ID (<span id="upiIdText"></span>)</button>
           </div>
         </div>
 
@@ -1042,20 +1052,43 @@ function renderQR(elId,amount){
   el.innerHTML="";
   new QRCode(el,{text:upiLink("upi",amount),width:180,height:180,colorDark:"#5B245F",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
 }
-function openUpiApp(amount){
+function upiIntentLink(scheme, amt){
+  // Build a proper direct-pay intent link (not a scannable/gallery QR link).
+  // Every UPI app treats a upi://pay (or its own scheme) link opened this way
+  // as a "collect from app" request, so the ₹2,000 gallery-QR cap does not apply here.
+  const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${amt}&cu=INR&tn=${encodeURIComponent("SpicyAromaPickles Order")}`;
+  return `${scheme}://pay?${params}`;
+}
+function openUpiApp(app, amount){
   const amt = amount || (cartTotal()+60);
-  const phonepe = `phonepe://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${amt}&cu=INR&tn=${encodeURIComponent("SpicyAromaPickles Order")}`;
-  const fallback = upiLink("upi",amt);
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const schemes = { gpay:"tez", phonepe:"phonepe", paytm:"paytmmp", generic:"upi" };
+  const chosenScheme = schemes[app] || "upi";
+  const primary = upiIntentLink(chosenScheme, amt);
+  const fallback = upiIntentLink("upi", amt); // generic UPI intent, opens the app picker
+
   if(isMobile){
     const start = Date.now();
-    window.location.href = phonepe;
-    setTimeout(()=>{ if(Date.now()-start < 2000){ window.location.href = fallback; } },1200);
+    // Try the specific app's own scheme first
+    window.location.href = primary;
+    // If the app isn't installed the page stays visible; after a short wait, fall back
+    // to the generic upi:// intent so Android/iOS can offer whichever UPI apps ARE installed.
+    setTimeout(()=>{
+      if(Date.now()-start < 2500 && document.visibilityState==="visible"){
+        window.location.href = fallback;
+      }
+    },1200);
   } else {
-    // Laptop / desktop: try installed UPI handler, then open PhonePe on web
-    try{ window.location.href = phonepe; }catch(e){}
-    setTimeout(()=>{ window.open("https://web.phonepe.com/", "_blank", "noopener"); },800);
+    // Desktop/laptop has no UPI app to hand off to — guide the user to pay by UPI ID instead.
+    alert("UPI apps open only on mobile phones. Please open this page on your phone, or copy the UPI ID below and pay directly from your UPI app using 'Pay to UPI ID'.");
   }
+}
+function copyUpiId(){
+  navigator.clipboard.writeText(UPI_ID).then(()=>{
+    alert("UPI ID copied: "+UPI_ID+"\nOpen your UPI app → Pay to UPI ID / Send Money → paste and pay ₹"+(cartTotal()+60)+".");
+  }).catch(()=>{
+    prompt("Copy this UPI ID and pay manually in your UPI app:", UPI_ID);
+  });
 }
 function togglePaymentDetails(method){
   const cod=document.getElementById("codDetails");
@@ -1065,6 +1098,8 @@ function togglePaymentDetails(method){
   } else {
     cod.style.display="none";upi.style.display="block";
     renderQR("qrCanvas", cartTotal()+60);
+    const idEl=document.getElementById("upiIdText");
+    if(idEl) idEl.textContent = UPI_ID;
   }
 }
 
