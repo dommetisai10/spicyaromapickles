@@ -320,8 +320,12 @@ footer h4{color:#fff}
 .btn-block{width:100%}
 .btn-lg{padding:15px 30px;font-size:1.05rem;border-radius:12px}
 
+.offer-progress{background:linear-gradient(135deg,var(--gold),#e8b52a);color:#2F2F2F;font-size:.85rem;font-weight:700;padding:12px 16px;border-radius:12px;display:flex;align-items:center;gap:8px;text-align:center;justify-content:center;box-shadow:var(--shadow-sm)}
+.offer-progress.unlocked{background:linear-gradient(135deg,var(--success),#4c9a3e);color:#fff}
+.offer-progress i{flex-shrink:0}
+
 /* TOAST NOTIFICATION */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(120px);background:linear-gradient(135deg,var(--blue),var(--blue-soft));color:#fff;padding:14px 26px;border-radius:999px;font-weight:600;font-size:.92rem;box-shadow:var(--shadow-lg);z-index:300;display:flex;align-items:center;gap:10px;opacity:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s ease;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(120px);background:linear-gradient(135deg,var(--blue),var(--blue-soft));color:#fff;padding:14px 26px;border-radius:22px;font-weight:600;font-size:.92rem;box-shadow:var(--shadow-lg);z-index:300;display:flex;align-items:center;gap:10px;opacity:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s ease;pointer-events:none;white-space:normal;max-width:min(92vw,420px);text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast i{color:var(--success)}
 
@@ -620,6 +624,7 @@ footer h4{color:#fff}
     </div>
     <div class="cart-list" id="cartList"></div>
     <div class="drawer-foot">
+      <div class="offer-progress" id="offerProgress" style="display:none"></div>
       <div class="price-summary">
         <div class="summary-row"><span>Subtotal</span><span id="cartSubtotal">&#8377;0</span></div>
         <div class="summary-row"><span>Delivery Charge</span><span>&#8377;60</span></div>
@@ -754,9 +759,9 @@ footer h4{color:#fff}
 /* ---- CONFIGURATION ---- */
 const WHATSAPP = "917989872395";
 // Update UPI_ID below with your actual UPI VPA (e.g. name@bank or phone@upi)
-const UPI_ID   = "7989872395@paytm";
+const UPI_ID   = "sivahdfc97@ybl";
 const UPI_NAME = "SpicyAromaPickles";
-const UPI_PHONE = "7989872395";
+const UPI_PHONE = "9440806968";
 const PROMO_START = new Date("2026-09-18T00:00:00+05:30");
 const PROMO_END = new Date("2026-09-20T23:59:59+05:30");
 const PROMO_OFFERS = [
@@ -845,6 +850,18 @@ function syncOfferItem(){
     state.cart.push({key:"FREE-AMLA",name:"Amla Pickle (FREE OFFER)",weight:offer.weight,price:0,qty:1,img:PRODUCTS.find(p=>p.n==="Amla Pickle")?.img,free:true});
   }
 }
+function getOfferProgressMessage(){
+  if(!isOfferActive())return null;
+  const total=getPaidCartTotal();
+  const sorted=[...PROMO_OFFERS].sort((a,b)=>a.min-b.min); // ascending: 499,799,1499
+  const next=sorted.find(o=>total<o.min);
+  if(next){
+    const remaining=next.min-total;
+    return {unlocked:false,html:`<i class="fas fa-gift"></i> Add &#8377;${remaining} more to get <b>FREE ${next.label}</b>!`,text:`Add \u20B9${remaining} more to get FREE ${next.label}!`};
+  }
+  const highest=sorted[sorted.length-1];
+  return {unlocked:true,html:`<i class="fas fa-check-circle"></i> You've unlocked <b>FREE ${highest.label}</b>! &#127881;`,text:`You've unlocked FREE ${highest.label}!`};
+}
 function updateOfferCountdown(){
   const el=document.getElementById("offerCountdown");
   if(!el)return;
@@ -910,7 +927,10 @@ function renderProducts(){
     p.c===state.filter
   );
   document.getElementById("prodGrid").innerHTML = list.map(p=>{
-    const i=PRODUCTS.indexOf(p), s=state.sel[i]??0, q=state.qty[i]??1;
+    const i=PRODUCTS.indexOf(p), s=state.sel[i]??0;
+    const key=p.n+"|"+p.w[s][0];
+    const cartItem=state.cart.find(c=>c.key===key);
+    const q=cartItem?cartItem.qty:0;
     return `<article class="prod-card reveal in">
       <div class="prod-media">
         ${p.best?'<span class="badge">BEST SELLER</span>':''}
@@ -923,13 +943,13 @@ function renderProducts(){
           ${p.w.map((w,j)=>`<button class="weight-btn${j===s?" active":""}" onclick="setWeight(${i},${j})">${w[0]}</button>`).join("")}
         </div>
         <div class="prod-controls">
-          <div class="qty">
+          ${cartItem?`<div class="qty">
             <button onclick="setQty(${i},-1)">&minus;</button><span>${q}</span><button onclick="setQty(${i},1)">+</button>
-          </div>
-          <div class="prod-price">&#8377;${p.w[s][1]*q}</div>
+          </div>`:''}
+          <div class="prod-price">&#8377;${p.w[s][1]*(q||1)}</div>
         </div>
         <div class="prod-btns">
-          <button class="btn btn-outline" onclick="addToCart(${i})">Add To Cart</button>
+          ${cartItem?`<button class="btn btn-outline" onclick="openCart()"><i class="fas fa-check"></i> Added</button>`:`<button class="btn btn-outline" onclick="addToCart(${i})">Add To Cart</button>`}
           <button class="btn btn-primary" onclick="buyNow(${i})">Buy Now</button>
         </div>
       </div>
@@ -943,7 +963,14 @@ function goCategory(f){
   setFilter(f);document.getElementById("products").scrollIntoView({behavior:"smooth"});
 }
 function setWeight(i,j){state.sel[i]=j;renderProducts();}
-function setQty(i,d){state.qty[i]=Math.max(1,Math.min(20,(state.qty[i]??1)+d));renderProducts();}
+function setQty(i,d){
+  const p=PRODUCTS[i],s=state.sel[i]??0,key=p.n+"|"+p.w[s][0];
+  const found=state.cart.find(c=>c.key===key);
+  if(!found)return;
+  found.qty+=d;
+  if(found.qty<=0){state.cart=state.cart.filter(c=>c.key!==key);}
+  renderCart();renderProducts();
+}
 
 /* ---- TOAST ---- */
 let toastTimer;
@@ -952,16 +979,18 @@ function showToast(msg){
   document.getElementById("toastMsg").textContent=msg;
   t.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove("show"),2200);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),3200);
 }
 
 /* ---- CART ---- */
 function addToCart(i){
-  const p=PRODUCTS[i],s=state.sel[i]??0,q=state.qty[i]??1;
+  const p=PRODUCTS[i],s=state.sel[i]??0;
   const key=p.n+"|"+p.w[s][0];
   const found=state.cart.find(c=>c.key===key);
-  if(found){found.qty+=q;}else{state.cart.push({key,name:p.n,weight:p.w[s][0],price:p.w[s][1],qty:q,img:(p.img||CAT_IMG[p.c])});}
-  renderCart();showToast(p.n+" added to cart!");
+  if(found){found.qty+=1;}else{state.cart.push({key,name:p.n,weight:p.w[s][0],price:p.w[s][1],qty:1,img:(p.img||CAT_IMG[p.c])});}
+  renderCart();renderProducts();
+  const progress=getOfferProgressMessage();
+  showToast(progress?`${p.n} added! ${progress.text}`:`${p.n} added to cart!`);
 }
 function buyNow(i){
   addToCart(i);openCart();
@@ -970,7 +999,9 @@ function addCombo(i){
   const c=COMBOS[i],key="COMBO|"+c.n;
   const found=state.cart.find(x=>x.key===key);
   if(found){found.qty+=1;}else{state.cart.push({key,name:c.n,weight:"Combo Pack",price:c.p,qty:1,img:IMG.combo});}
-  renderCart();showToast(c.n+" added to cart!");
+  renderCart();
+  const progress=getOfferProgressMessage();
+  showToast(progress?`${c.n} added! ${progress.text}`:`${c.n} added to cart!`);
 }
 function buyCombo(i){addCombo(i);openCart();}
 function removeItem(k){state.cart=state.cart.filter(c=>c.key!==k);renderCart();}
@@ -983,6 +1014,17 @@ function cartTotal(){return state.cart.reduce((t,c)=>t+c.price*c.qty,0);}
 
 function renderCart(){
   syncOfferItem();
+  const banner=document.getElementById("offerProgress");
+  const progress=getOfferProgressMessage();
+  if(banner){
+    if(progress){
+      banner.style.display="flex";
+      banner.classList.toggle("unlocked",progress.unlocked);
+      banner.innerHTML=progress.html;
+    } else {
+      banner.style.display="none";
+    }
+  }
   const list=document.getElementById("cartList");
   if(!state.cart.length){
     list.innerHTML='<div class="cart-empty"><i class="fas fa-shopping-cart" style="font-size:3rem;color:var(--beige);margin-bottom:12px"></i><br/>Your cart is empty.<br/>Add your favourite pickles!</div>';
