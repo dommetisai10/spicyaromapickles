@@ -430,13 +430,13 @@ footer h4{color:#fff}
 <div class="offer-strip" role="status" aria-live="polite">
   <div class="announce">
     <div class="announce-track">
-      <span>WELCOME OFFER: Buy &#8377;499+ &amp; get 100g Amla Pickle FREE</span>
-      <span>Buy &#8377;799+ &amp; get 250g Amla Pickle FREE</span>
-      <span>Buy &#8377;1499+ &amp; get 250g Amla Pickle FREE</span>
+      <span>WELCOME OFFER: Buy &#8377;499+ &amp; get 150g Amla Pickle FREE</span>
+      <span>Buy &#8377;799+ &amp; get 250g Mango Pickle FREE</span>
+      <span>Buy &#8377;1499+ &amp; get 500g Chicken Pickle FREE</span>
       <span>Offer valid September 18th to 20th only</span>
-      <span>WELCOME OFFER: Buy &#8377;499+ &amp; get 100g Amla Pickle FREE</span>
-      <span>Buy &#8377;799+ &amp; get 250g Amla Pickle FREE</span>
-      <span>Buy &#8377;1499+ &amp; get 250g Amla Pickle FREE</span>
+      <span>WELCOME OFFER: Buy &#8377;499+ &amp; get 150g Amla Pickle FREE</span>
+      <span>Buy &#8377;799+ &amp; get 250g Mango Pickle FREE</span>
+      <span>Buy &#8377;1499+ &amp; get 500g Chicken Pickle FREE</span>
       <span>Offer valid September 18th to 20th only</span>
     </div>
   </div>
@@ -775,9 +775,9 @@ const UPI_PHONE = "7989872395";
 const PROMO_START = new Date("2026-09-18T00:00:00+05:30");
 const PROMO_END = new Date("2026-09-20T23:59:59+05:30");
 const PROMO_OFFERS = [
-  {min:1499, weight:"250g", label:"250g Amla Pickle"},
-  {min:799, weight:"250g", label:"250g Amla Pickle"},
-  {min:499, weight:"100g", label:"100g Amla Pickle"}
+  {min:1499, weight:"500g", label:"500g Chicken Pickle", key:"FREE-CHICKEN", name:"Chicken Pickle (FREE OFFER)", product:"Chicken Boneless"},
+  {min:799, weight:"250g", label:"250g Mango Pickle", key:"FREE-MANGO", name:"Mango Pickle (FREE OFFER)", product:"Mango Pickle"},
+  {min:499, weight:"150g", label:"150g Amla Pickle", key:"FREE-AMLA", name:"Amla Pickle (FREE OFFER)", product:"Amla Pickle"}
 ];
 
 const IMG = {
@@ -857,7 +857,7 @@ function syncOfferItem(){
   state.cart=state.cart.filter(item=>!item.free);
   const offer=getOffer();
   if(offer){
-    state.cart.push({key:"FREE-AMLA",name:"Amla Pickle (FREE OFFER)",weight:offer.weight,price:0,qty:1,img:PRODUCTS.find(p=>p.n==="Amla Pickle")?.img,free:true});
+    state.cart.push({key:offer.key,name:offer.name,weight:offer.weight,price:0,qty:1,img:PRODUCTS.find(p=>p.n===offer.product)?.img,free:true});
   }
 }
 function getOfferProgressMessage(){
