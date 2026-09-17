@@ -726,7 +726,6 @@ footer h4{color:#fff}
             <div id="qrCanvas" aria-label="UPI payment QR code"></div>
             <span class="qr-label">Scan to Pay <strong id="upiAmountLabel"></strong></span>
             <span class="qr-sublabel">Receiver: <strong>SHAIK ARIFA</strong> &bull; UPI ID: <strong>7989872395-3@axl</strong></span>
-            <button type="button" class="upi-app-btn" onclick="openUpiApp()"><i class="fas fa-mobile-alt"></i> Open UPI App &amp; Pay</button>
             <button type="button" class="upi-app-btn upi-app-btn-outline" onclick="downloadQr()"><i class="fas fa-download"></i> Download QR</button>
             <span class="upi-hint">Choose PhonePe, Google Pay, Paytm or your bank UPI app, check the receiver name, and complete the payment.</span>
             <span class="upi-hint" style="background:#fff8e1;border:1px dashed var(--gold);border-radius:10px;padding:10px 12px;margin-top:8px;color:#5a4610;font-weight:500;"><i class="fas fa-info-circle" style="margin-right:6px;color:var(--gold);"></i><strong>Note:</strong> If PhonePe does not work, download this QR or copy the UPI ID / number to pay. Please check the receiver name: <strong>SHAIK ARIFA</strong>, NUMBER <strong>7989872395</strong>, then pay.</span>
@@ -809,7 +808,7 @@ const PRODUCTS = [
   {n:"Cauliflower Pickle",       img:"https://m.media-amazon.com/images/I/71ArVnF7K7L._AC_UF350,350_QL80_.jpg", c:"Veg Pickles",                 w:[["250g",180],["500g",370], ["1kg",745]]},
   {n:"Amla Pickle",              img:"https://www.indianhealthyrecipes.com/wp-content/uploads/2022/05/amla-pickle-pickle.jpg", c:"Veg Pickles",                 w:[["250g",160],["500g",300], ["1kg",560]]},
   {n:"Pandu Mirchi Gongura",     img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTapcLtCBdvNxIAZi7Si2KIgrz46li5sJZBrVDr6Y-mIfyAxv4qgd8Uyzo&s=10", c:"Veg Pickles",     best:true,  w:[["250g",185],["500g",375], ["1kg",755]]},
-  {n:"Finger Appadalu",          img:"https://mylaporekitchens.in/cdn/shop/files/359331634_660975412717590_5259880372006370239_n.jpg?v=1688801898&width=1445&utm_source=chatgpt.com", c:"Snacks",                      w:[["250g",180],["500g",340], ["1kg",555]]},
+  {n:"Finger Appadalu",          img:"https://indiashopping.io/cdn/shop/files/fryums.jpg?v=1738400908&width=1457", c:"Snacks",                      w:[["250g",180],["500g",340], ["1kg",555]]},
   {n:"Ura Mirapakayalu",         img:"https://m.media-amazon.com/images/I/81T6alBdI7L._AC_UF350,350_QL80_.jpg", c:"Snacks",                      w:[["100g",120],["250g",350], ["500g",600],["1kg",1100]]},
   {n:"Karivepaku Karam",         img:"https://id-preview--be86746d-5cd7-407d-8dbd-289879b5a664.lovable.app/__l5e/assets-v1/3bfec867-10e2-4748-a49d-448e6ec9592a/karivepaku-karam.jpg", c:"Powders",         best:true,  w:[["250g",249],["500g",449], ["1kg",999]]},
   {n:"Munaga Karam",             img:"https://id-preview--be86746d-5cd7-407d-8dbd-289879b5a664.lovable.app/__l5e/assets-v1/05b7892c-42bc-4ce2-97a8-a453a689fc5b/munaga-karam.jpg", c:"Powders",                     w:[["250g",270],["500g",470], ["1kg",1100]]}
@@ -1132,7 +1131,7 @@ function renderQR(elId,amount){
   if(typeof QRCode!=="undefined"){
     new QRCode(el,{text:value,width:210,height:210,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
   }else{
-    el.innerHTML='<div class="upi-qr-error">QR unavailable. Use “Open UPI App” or copy the UPI ID below.</div>';
+    el.innerHTML='<div class="upi-qr-error">QR unavailable. Please copy the UPI ID below and pay.</div>';
   }
   const amountLabel=document.getElementById("upiAmountLabel");
   if(amountLabel)amountLabel.textContent=`₹${Number(amount).toFixed(0)}`;
